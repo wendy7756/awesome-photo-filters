@@ -1,0 +1,4 @@
+interface:
+  display_name: "Awesome Photo Filters"
+  short_description: "36 photo filters — local effects and AI editorial workflows."
+  default_prompt: "Help me apply a photo filter to this image."

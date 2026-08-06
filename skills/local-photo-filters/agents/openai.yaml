@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local Photo Filters"
+  short_description: "Apply 35 Canvas-style photo filters via Codex image editing."
+  default_prompt: "Apply a photo filter to this image. Ask which filter if none is specified."
