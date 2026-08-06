@@ -1,11 +1,7 @@
-import {
-  ABSTRACT_EDITORIAL_ID,
-  getExpectedCompositeAspectRatio,
-} from "./abstract-editorial";
+import { ABSTRACT_EDITORIAL_ID } from "./abstract-editorial";
 import { effects, getEffectById, isAiEffect, isLocalEffect } from "./effects";
 import {
   closestAspectRatio,
-  closestAspectRatioFromValue,
   generateImage,
   listImageModels,
   type ImageModel,
@@ -39,15 +35,11 @@ interface AppState {
   modelsError: string | null;
   isSettingsPinned: boolean;
   isGenerating: boolean;
-  generationPhase: "panel" | "artwork" | null;
   generationError: string | null;
   aiPanelDataUrl: string | null;
   aiCompositeDataUrl: string | null;
   panelWidth: number;
   panelHeight: number;
-  compositeAspectRatio: number;
-  compositeWidth: number;
-  compositeHeight: number;
   isFilterPickerOpen: boolean;
   filterSearchQuery: string;
 }
@@ -68,15 +60,11 @@ const state: AppState = {
   modelsError: null,
   isSettingsPinned: false,
   isGenerating: false,
-  generationPhase: null,
   generationError: null,
   aiPanelDataUrl: null,
   aiCompositeDataUrl: null,
   panelWidth: 0,
   panelHeight: 0,
-  compositeAspectRatio: 4 / 3,
-  compositeWidth: 0,
-  compositeHeight: 0,
   isFilterPickerOpen: false,
   filterSearchQuery: "",
 };
@@ -119,20 +107,10 @@ function clearAiResults(): void {
   state.aiCompositeDataUrl = null;
   state.panelWidth = 0;
   state.panelHeight = 0;
-  state.compositeAspectRatio = state.aspectRatio;
-  state.compositeWidth = 0;
-  state.compositeHeight = 0;
 }
 
 function generationStatusText(): string {
-  const model = escapeHtml(selectedModelLabel());
-  if (state.generationPhase === "panel") {
-    return `Generating abstract panel (1/2) with ${model}...`;
-  }
-  if (state.generationPhase === "artwork") {
-    return `Generating artwork (2/2) with ${model}...`;
-  }
-  return `Generating with ${model}...`;
+  return "Generating...";
 }
 
 function selectedEffect() {
@@ -172,13 +150,6 @@ function closeFilterPicker(): void {
   state.isFilterPickerOpen = false;
   state.filterSearchQuery = "";
   render();
-}
-
-function selectedModelLabel(): string {
-  const model = state.availableModels.find((item) => item.id === state.selectedModelId);
-  if (model) return model.name;
-  if (state.selectedModelId) return state.selectedModelId;
-  return "Not selected";
 }
 
 function modelStatusText(): string {
@@ -302,7 +273,6 @@ function render(): void {
   const isAbstractEditorial = isAbstractEditorialSelected();
   const showIntensity = isLocalEffect(effect);
   const hasAiPanel = isAbstractEditorial && Boolean(state.aiPanelDataUrl);
-  const hasAiComposite = isAbstractEditorial && Boolean(state.aiCompositeDataUrl);
   const hasResultPreview = isAbstractEditorial
     ? hasAiPanel
     : isAi
@@ -488,25 +458,6 @@ function render(): void {
             </div>
           </article>
         </div>
-        ${
-          hasAiComposite
-            ? `
-          <article class="panel panel-composite">
-            <header class="panel-header">
-              <span class="panel-label">Artwork</span>
-              <span class="panel-meta">${formatPanelMeta(
-                state.compositeWidth,
-                state.compositeHeight,
-                state.compositeAspectRatio
-              )}</span>
-            </header>
-            <div class="panel-frame" style="aspect-ratio: ${state.compositeAspectRatio}">
-              <img id="artwork-image" src="${state.aiCompositeDataUrl}" alt="Generated editorial artwork" class="panel-image" />
-            </div>
-          </article>
-        `
-            : ""
-        }
       </main>
 
       <footer class="footer">
@@ -823,7 +774,6 @@ async function runAiGeneration(): Promise<void> {
   }
 
   state.isGenerating = true;
-  state.generationPhase = isAiEffect(effect) && effect.compositePrompt ? "panel" : null;
   state.generationError = null;
   render();
 
@@ -831,56 +781,24 @@ async function runAiGeneration(): Promise<void> {
     const { naturalWidth, naturalHeight } = state.sourceImage;
     const sourceAspectRatio = closestAspectRatio(naturalWidth, naturalHeight);
 
-    if (isAiEffect(effect) && effect.compositePrompt) {
-      const panelDataUrl = await generateImage({
-        apiKey: state.apiKey,
-        baseUrl: state.baseUrl,
-        model: state.selectedModelId,
-        prompt: effect.prompt,
-        inputImageDataUrl: state.sourceDataUrl,
-        aspectRatio: sourceAspectRatio,
-      });
+    const resultDataUrl = await generateImage({
+      apiKey: state.apiKey,
+      baseUrl: state.baseUrl,
+      model: state.selectedModelId,
+      prompt: effect.prompt,
+      inputImageDataUrl: state.sourceDataUrl,
+      aspectRatio: sourceAspectRatio,
+    });
 
-      const panelImage = await loadImage(panelDataUrl);
-      state.aiPanelDataUrl = panelDataUrl;
-      state.panelWidth = panelImage.naturalWidth;
-      state.panelHeight = panelImage.naturalHeight;
+    const resultImage = await loadImage(resultDataUrl);
+
+    if (isAbstractEditorialSelected()) {
+      state.aiPanelDataUrl = resultDataUrl;
+      state.panelWidth = resultImage.naturalWidth;
+      state.panelHeight = resultImage.naturalHeight;
       state.resultAspectRatio = state.aspectRatio;
-
-      state.generationPhase = "artwork";
-      render();
-
-      const compositeAspectRatio = closestAspectRatioFromValue(
-        getExpectedCompositeAspectRatio(naturalWidth, naturalHeight)
-      );
-      const compositeDataUrl = await generateImage({
-        apiKey: state.apiKey,
-        baseUrl: state.baseUrl,
-        model: state.selectedModelId,
-        prompt: effect.compositePrompt,
-        inputImageDataUrl: state.sourceDataUrl,
-        aspectRatio: compositeAspectRatio,
-      });
-
-      const compositeImage = await loadImage(compositeDataUrl);
-      state.aiCompositeDataUrl = compositeDataUrl;
-      state.compositeWidth = compositeImage.naturalWidth;
-      state.compositeHeight = compositeImage.naturalHeight;
-      state.compositeAspectRatio = compositeImage.naturalWidth / compositeImage.naturalHeight;
     } else {
-      const resultDataUrl = await generateImage({
-        apiKey: state.apiKey,
-        baseUrl: state.baseUrl,
-        model: state.selectedModelId,
-        prompt: effect.prompt,
-        inputImageDataUrl: state.sourceDataUrl,
-        aspectRatio: sourceAspectRatio,
-      });
-
-      const resultImage = await loadImage(resultDataUrl);
       state.aiCompositeDataUrl = resultDataUrl;
-      state.compositeWidth = resultImage.naturalWidth;
-      state.compositeHeight = resultImage.naturalHeight;
       state.resultAspectRatio = resultImage.naturalWidth / resultImage.naturalHeight;
     }
   } catch (error) {
@@ -888,7 +806,6 @@ async function runAiGeneration(): Promise<void> {
     clearAiResults();
   } finally {
     state.isGenerating = false;
-    state.generationPhase = null;
     render();
   }
 }
