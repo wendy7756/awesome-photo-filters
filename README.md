@@ -1,5 +1,5 @@
-# awesome-visual-effects
+# Awesome AI Filters
 
-A curated collection of AI visual effects, photo filters, creative prompts, and open-source workflows for transforming photos and videos.
+A curated collection of AI photo filters and visual effect prompts for image editing.
 
-This repository collects reusable effects across image generation, video generation, photo editing, filters, style transfer, prompt engineering, ComfyUI workflows, shaders, and creative coding.
+This repository collects simple, copyable prompts that transform photos into different visual styles, filters, and effects while preserving the original subject, composition, and identity.
