@@ -410,13 +410,25 @@ function render(): void {
               }
             </header>
             <div
-              class="panel-frame ${state.isDragging ? "is-dragging" : ""}"
+              class="panel-frame ${state.isDragging ? "is-dragging" : ""}${hasImage && !state.isGenerating ? " is-replaceable" : ""}${state.isGenerating ? " is-upload-disabled" : ""}"
               style="aspect-ratio: ${state.aspectRatio}"
               id="drop-zone"
             >
               ${
                 hasImage
-                  ? `<img src="${state.sourceImage!.src}" alt="Uploaded original" class="panel-image" />`
+                  ? `
+                <img src="${state.sourceImage!.src}" alt="Uploaded original" class="panel-image" />
+                ${
+                  !state.isGenerating
+                    ? `
+                  <label class="replace-overlay" for="file-input">
+                    <span class="replace-overlay-title">Replace image</span>
+                    <span class="replace-overlay-hint">Click or drop a new file</span>
+                  </label>
+                `
+                    : ""
+                }
+              `
                   : `
                 <label class="upload-zone" for="file-input">
                   <span class="upload-title">Upload an image</span>
@@ -424,7 +436,7 @@ function render(): void {
                 </label>
               `
               }
-              <input type="file" id="file-input" accept="image/*" hidden />
+              <input type="file" id="file-input" accept="image/*" hidden ${state.isGenerating ? "disabled" : ""} />
             </div>
           </article>
 
@@ -483,10 +495,12 @@ function bindEvents(): void {
 
   fileInput?.addEventListener("change", () => {
     const file = fileInput.files?.[0];
+    fileInput.value = "";
     if (file) loadFile(file);
   });
 
   dropZone?.addEventListener("dragover", (event) => {
+    if (state.isGenerating) return;
     event.preventDefault();
     state.isDragging = true;
     dropZone.classList.add("is-dragging");
@@ -498,6 +512,7 @@ function bindEvents(): void {
   });
 
   dropZone?.addEventListener("drop", (event) => {
+    if (state.isGenerating) return;
     event.preventDefault();
     state.isDragging = false;
     dropZone.classList.remove("is-dragging");

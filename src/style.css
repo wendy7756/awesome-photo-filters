@@ -593,6 +593,46 @@ body {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
+.panel-frame.is-replaceable {
+  cursor: pointer;
+}
+
+.panel-frame.is-upload-disabled {
+  cursor: not-allowed;
+}
+
+.replace-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 24px;
+  text-align: center;
+  background: rgba(26, 25, 21, 0.42);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.panel-frame.is-replaceable:hover .replace-overlay,
+.panel-frame.is-replaceable.is-dragging .replace-overlay {
+  opacity: 1;
+}
+
+.replace-overlay-title {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+}
+
+.replace-overlay-hint {
+  font-size: 0.8125rem;
+  opacity: 0.88;
+}
+
 .panel-image {
   display: block;
   width: 100%;
