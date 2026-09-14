@@ -29,7 +29,13 @@ export interface AiEffect extends EffectBase {
   requiresImageInput?: boolean;
 }
 
-export type VisualEffect = LocalEffect | AiEffect;
+/** Browser-based video effect (upload video → process → export). */
+export interface VideoEffect extends EffectBase {
+  kind: "video";
+  sourceUrl?: string;
+}
+
+export type VisualEffect = LocalEffect | AiEffect | VideoEffect;
 
 export function isAiEffect(effect: VisualEffect): effect is AiEffect {
   return effect.kind === "ai";
@@ -37,4 +43,8 @@ export function isAiEffect(effect: VisualEffect): effect is AiEffect {
 
 export function isLocalEffect(effect: VisualEffect): effect is LocalEffect {
   return effect.kind === "local";
+}
+
+export function isVideoEffect(effect: VisualEffect): effect is VideoEffect {
+  return effect.kind === "video";
 }

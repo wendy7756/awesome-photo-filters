@@ -2,7 +2,7 @@
 
 **Repository:** [github.com/wendy7756/awesome-photo-filters](https://github.com/wendy7756/awesome-photo-filters)
 
-A collection of **36 photo filters** — 35 local Canvas effects and 1 AI editorial workflow — usable in **Codex** (no API key) or in the **web playground** (live preview + OpenRouter for AI).
+A collection of **37 filters** — 35 local Canvas effects, 1 AI editorial workflow, and 1 **Finger Frame** video effect — usable in **Codex** (no API key for local filters) or in the **web playground** (live preview + OpenRouter / Gemini where noted).
 
 ## Install in Codex (recommended)
 
@@ -11,7 +11,7 @@ Install all skills with one command. Uses Codex built-in image generation — **
 ```bash
 "$CODEX_HOME/skills/.system/skill-installer/scripts/install-skill-from-github.py" \
   --repo wendy7756/awesome-photo-filters \
-  --path skills/awesome-photo-filters skills/local-photo-filters skills/photo-abstract-editorial
+  --path skills/awesome-photo-filters skills/local-photo-filters skills/photo-abstract-editorial skills/finger-frame
 ```
 
 Or from a cloned repo:
@@ -35,6 +35,7 @@ Skills install to `$CODEX_HOME/skills/` (default `~/.codex/skills/`) and are ava
 | [awesome-photo-filters](skills/awesome-photo-filters/SKILL.md) | Router — picks the right workflow |
 | [local-photo-filters](skills/local-photo-filters/SKILL.md) | 35 local filters (VHS, sketch, neon, …) |
 | [photo-abstract-editorial](skills/photo-abstract-editorial/SKILL.md) | AI editorial (photo + abstract panel + title) |
+| [finger-frame](skills/finger-frame/SKILL.md) | Finger-frame video effect (hand-window masking) |
 
 ---
 
@@ -67,11 +68,27 @@ npm run preview  # preview production build
    - Select an image-to-image model
 5. Click **Generate** for AI effects, then **Download** the result.
 
+### Finger Frame (video, local)
+
+Choose **Finger Frame** in the filter picker for the [finger-frame-effect-ai](https://github.com/sophiamyang/finger-frame-effect-ai) workflow:
+
+1. Upload a short clip with the two-hand finger-frame gesture (&lt;15MB).
+2. Enter a [Gemini API key](https://aistudio.google.com/apikey) (or use **Try placeholder** without a key).
+3. **Generate AI video** → **Preview** → **Export**.
+
+Hand tracking runs in the browser (MediaPipe). For batch CLI processing, see [scripts/finger-frame/README.md](scripts/finger-frame/README.md).
+
 ---
 
 ## Filters
 
 Each filter lists its **ID**, default intensity, description, and source links.
+
+### Video Effects
+
+| Filter | ID | Description | Source |
+| --- | --- | --- | --- |
+| Finger Frame | `finger-frame` | AI world inside tracked finger-frame window. | [finger-frame-effect-ai](https://github.com/sophiamyang/finger-frame-effect-ai) · Web: [`src/finger-frame/`](src/finger-frame/) · CLI: [`scripts/finger-frame/`](scripts/finger-frame/) |
 
 ### AI Effects
 

@@ -1,4 +1,5 @@
 import { aiEffects } from "./ai-effects";
+import { videoEffects } from "./video-effects";
 import {
   blurEffect,
   duotoneEffect,
@@ -82,10 +83,10 @@ export const localEffects: VisualEffect[] = [
   lightLeakEffect,
 ];
 
-export const effects: VisualEffect[] = [...aiEffects, ...localEffects];
+export const effects: VisualEffect[] = [...videoEffects, ...aiEffects, ...localEffects];
 
 export function getEffectById(id: string): VisualEffect | undefined {
   return effects.find((effect) => effect.id === id);
 }
 
-export { type VisualEffect, isAiEffect, isLocalEffect } from "./types";
+export { type VisualEffect, isAiEffect, isLocalEffect, isVideoEffect } from "./types";

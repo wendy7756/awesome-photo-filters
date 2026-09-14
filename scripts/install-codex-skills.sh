@@ -16,7 +16,7 @@ fi
 python3 "$INSTALLER" \
   --repo "$REPO" \
   --ref "$REF" \
-  --path skills/awesome-photo-filters skills/local-photo-filters skills/photo-abstract-editorial
+  --path skills/awesome-photo-filters skills/local-photo-filters skills/photo-abstract-editorial skills/finger-frame
 
 echo "Installed awesome-photo-filters skills into $CODEX_HOME/skills/"
 echo "Available on your next Codex turn."

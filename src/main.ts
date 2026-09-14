@@ -1,5 +1,11 @@
 import { ABSTRACT_EDITORIAL_ID } from "./abstract-editorial";
-import { effects, getEffectById, isAiEffect, isLocalEffect } from "./effects";
+import { FINGER_FRAME_ID } from "./effects/video-effects";
+import { effects, getEffectById, isAiEffect, isLocalEffect, isVideoEffect } from "./effects";
+import {
+  destroyFingerFramePanel,
+  mountFingerFramePanel,
+  renderFingerFrameWorkspace,
+} from "./finger-frame/panel";
 import {
   closestAspectRatio,
   generateImage,
@@ -98,6 +104,7 @@ function formatPanelMeta(width: number, height: number, ratio: number): string {
   return formatAspectRatio(ratio) ?? `${width} × ${height} px`;
 }
 
+
 function isAbstractEditorialSelected(): boolean {
   return state.selectedEffectId === ABSTRACT_EDITORIAL_ID;
 }
@@ -142,6 +149,9 @@ function selectEffect(effectId: string): void {
   state.resultAspectRatio = state.aspectRatio;
   state.isFilterPickerOpen = false;
   state.filterSearchQuery = "";
+  if (effectId !== FINGER_FRAME_ID) {
+    destroyFingerFramePanel();
+  }
   render();
 }
 
@@ -268,6 +278,11 @@ function escapeHtml(value: string): string {
 
 function render(): void {
   const effect = selectedEffect();
+  if (isVideoEffect(effect)) {
+    renderVideoEffectApp(effect);
+    return;
+  }
+
   const hasImage = state.sourceImage !== null;
   const isAi = isAiEffect(effect);
   const isAbstractEditorial = isAbstractEditorialSelected();
@@ -484,6 +499,102 @@ function render(): void {
   if (hasImage && isLocalEffect(effect)) {
     applyLocalEffect();
   }
+}
+
+function renderVideoEffectApp(effect: ReturnType<typeof selectedEffect>): void {
+  destroyFingerFramePanel();
+  app.innerHTML = `
+    <div class="layout">
+      <header class="header">
+        <div class="brand">
+          <h1>Photo Filters</h1>
+          <p>${escapeHtml(effect.description)}</p>
+        </div>
+        <div class="header-actions">
+          <a class="github-link" href="https://github.com/wendy7756/awesome-photo-filters" target="_blank" rel="noreferrer" aria-label="View on GitHub">
+            <svg class="github-link-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2C6.477 2 2 6.484 2 12.021c0 4.428 2.865 8.184 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.021C22 6.484 17.522 2 12 2z"/>
+            </svg>
+          </a>
+        </div>
+      </header>
+
+      <section class="toolbar" aria-label="Effect controls">
+        <div class="toolbar-main">
+          <div class="toolbar-filter-row">
+            ${renderEffectPicker()}
+          </div>
+        </div>
+      </section>
+
+      ${renderFingerFrameWorkspace()}
+    </div>
+  `;
+
+  bindEffectPickerEvents();
+  mountFingerFramePanel();
+}
+
+function renderEffectPicker(): string {
+  const effect = selectedEffect();
+  return `
+    <div class="effect-picker">
+      <label for="effect-search">Filter</label>
+      <div class="effect-combobox ${state.isFilterPickerOpen ? "is-open" : ""}" id="effect-combobox">
+        ${
+          state.isFilterPickerOpen
+            ? `
+          <input
+            id="effect-search"
+            class="effect-combobox-input"
+            type="search"
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="effect-combobox-list"
+            autocomplete="off"
+            placeholder="Search filters..."
+            value="${escapeHtml(state.filterSearchQuery)}"
+          />
+        `
+            : `
+          <button class="effect-combobox-trigger" id="effect-combobox-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+            ${escapeHtml(effect.name)}
+          </button>
+        `
+        }
+        ${
+          state.isFilterPickerOpen
+            ? `
+          <ul class="effect-combobox-list" id="effect-combobox-list" role="listbox">
+            ${
+              filteredEffects().length > 0
+                ? filteredEffects()
+                    .map(
+                      (item) => `
+                  <li>
+                    <button
+                      class="effect-combobox-option ${item.id === state.selectedEffectId ? "is-selected" : ""}"
+                      type="button"
+                      role="option"
+                      aria-selected="${item.id === state.selectedEffectId}"
+                      data-effect-id="${item.id}"
+                    >
+                      <span class="effect-combobox-option-name">${escapeHtml(item.name)}</span>
+                      <span class="effect-combobox-option-desc">${escapeHtml(item.description)}</span>
+                    </button>
+                  </li>
+                `
+                    )
+                    .join("")
+                : `<li class="effect-combobox-empty">No filters match "${escapeHtml(state.filterSearchQuery)}"</li>`
+            }
+          </ul>
+        `
+            : ""
+        }
+      </div>
+    </div>
+  `;
 }
 
 function bindEvents(): void {

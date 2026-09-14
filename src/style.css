@@ -692,6 +692,135 @@ body {
   padding-top: 8px;
 }
 
+/* Finger Frame effect */
+.finger-frame-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.finger-frame-settings.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+}
+
+.finger-frame-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.finger-frame-step .step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.finger-frame-hint {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.finger-frame-hint a {
+  color: var(--accent);
+}
+
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.finger-frame-style-row {
+  display: grid;
+  gap: 12px;
+}
+
+.finger-frame-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.finger-frame-status {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  min-height: 1.25rem;
+}
+
+.finger-frame-status.is-working::before {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+  vertical-align: -2px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.finger-frame-drop.has-video .upload-zone {
+  padding: 20px;
+}
+
+.finger-frame-result {
+  position: relative;
+  background: #000;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.finger-frame-canvas {
+  display: block;
+  width: 100%;
+  max-height: 70vh;
+  border-radius: var(--radius-md);
+}
+
+.finger-frame-result .result-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.finger-frame-footer a {
+  color: var(--accent);
+}
+
+.hidden {
+  display: none !important;
+}
+
 @media (max-width: 1024px) {
   .settings-popover {
     width: min(280px, calc(100vw - 32px));
